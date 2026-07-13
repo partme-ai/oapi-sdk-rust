@@ -1,0 +1,12 @@
+oapi-sdk-rust
+Copyright (c) 2026 Partme AI contributors
+
+This project is an independent Rust implementation informed by the public,
+MIT-licensed behavior and architecture of the official Lark/Feishu SDKs:
+
+- https://github.com/larksuite/oapi-sdk-go
+- https://github.com/larksuite/oapi-sdk-python
+- https://github.com/larksuite/oapi-sdk-java
+
+Lark and Feishu are trademarks of their respective owners. This project is not
+an official ByteDance/Lark Technologies SDK unless explicitly adopted upstream.
