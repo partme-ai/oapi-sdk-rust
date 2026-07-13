@@ -1,0 +1,41 @@
+name: Import validated 1.0.0-rc.1 source
+
+on:
+  push:
+    branches:
+      - agent/import-1.0.0-rc.1-main
+    paths:
+      - .import/READY
+
+permissions:
+  contents: write
+
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reassemble and verify source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .import/chunk-* | base64 --decode > /tmp/oapi-sdk-rust.zip
+          echo "a9b7a8e27e6679cabc5997c0226c5b9b5818451fdb0f53e79d40a423f34125f7  /tmp/oapi-sdk-rust.zip" | sha256sum --check --strict
+          rm -rf /tmp/oapi-sdk-rust-src
+          mkdir -p /tmp/oapi-sdk-rust-src
+          unzip -q /tmp/oapi-sdk-rust.zip -d /tmp/oapi-sdk-rust-src
+      - name: Replace branch with validated source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/oapi-sdk-rust-src/. .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git fetch origin main
+          git reset --soft origin/main
+          git commit -m "Release 1.0.0-rc.1"
+          git push --force origin HEAD:agent/import-1.0.0-rc.1-main
