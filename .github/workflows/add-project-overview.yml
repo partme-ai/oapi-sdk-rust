@@ -1,0 +1,66 @@
+name: Add project overview
+
+on:
+  push:
+    branches:
+      - agent/add-project-overview
+    paths:
+      - .overview/READY
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Add project overview to READMEs
+        shell: python
+        run: |
+          from pathlib import Path
+
+          updates = {
+              Path("README.md"): (
+                  "[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)\n\n",
+                  "## Project overview\n\n"
+                  "`oapi-sdk-rust` is a production-oriented asynchronous Rust SDK for the Feishu/Lark Open Platform, "
+                  "designed for CLI tools, Tauri desktop applications, backend services, bots, and AI agents. It provides "
+                  "OpenAPI access, authentication and token caching, one-click app registration, event callbacks, "
+                  "WebSocket/Webhook Channel integration, media handling, and streaming message capabilities while preserving "
+                  "the domain semantics of the official Java SDK through idiomatic Rust APIs.\n\n"
+              ),
+              Path("README.zh-CN.md"): (
+                  "[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)\n\n",
+                  "## 项目简介\n\n"
+                  "`oapi-sdk-rust` 是面向飞书 / Lark 开放平台的生产级异步 Rust SDK，适用于 CLI 工具、Tauri 桌面应用、"
+                  "服务端、机器人和 AI Agent。项目提供 OpenAPI 调用、鉴权与令牌缓存、应用一键创建、事件回调、"
+                  "WebSocket/Webhook Channel、媒体处理和流式消息等能力，并在保持 Rust `snake_case`、`async/await`、"
+                  "`Result` 与 trait 使用习惯的同时，对齐官方 Java SDK 的领域对象、调用流程、状态和错误语义。\n\n"
+              ),
+          }
+
+          for path, (marker, block) in updates.items():
+              text = path.read_text(encoding="utf-8")
+              if "## Project overview" in text or "## 项目简介" in text:
+                  continue
+              if marker not in text:
+                  raise RuntimeError(f"marker not found in {path}")
+              path.write_text(text.replace(marker, marker + block, 1), encoding="utf-8")
+
+      - name: Commit to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md README.zh-CN.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Add project overview"
+          git push origin HEAD:main
