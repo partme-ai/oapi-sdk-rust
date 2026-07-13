@@ -1,0 +1,49 @@
+name: Import RC source
+
+on:
+  push:
+    branches:
+      - agent/merge-1.0.0-rc.1
+    paths:
+      - .import/READY
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reassemble and verify source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .import/part-* | base64 --decode > /tmp/oapi-sdk-rust.zip
+          echo "66fe4a6d58a343de1122225518d48ecf31c9270fca1787fcf6285f6c18e580a5  /tmp/oapi-sdk-rust.zip" | sha256sum --check --strict
+          rm -rf /tmp/oapi-sdk-rust-import
+          mkdir -p /tmp/oapi-sdk-rust-import
+          unzip -q /tmp/oapi-sdk-rust.zip -d /tmp/oapi-sdk-rust-import
+
+      - name: Replace repository tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="/tmp/oapi-sdk-rust-import/oapi-sdk-rust-1.0.0-rc.1"
+          test -f "$source_root/Cargo.toml"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$source_root"/. .
+
+      - name: Commit imported release candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Release oapi-sdk-rust 1.0.0-rc.1"
+          git push origin HEAD:agent/merge-1.0.0-rc.1
