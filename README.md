@@ -6,6 +6,10 @@
 [![MSRV](https://img.shields.io/badge/MSRV-1.85-blue)](rust-toolchain.toml)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+## Project overview
+
+`oapi-sdk-rust` is a production-oriented asynchronous Rust SDK for the Feishu/Lark Open Platform, designed for CLI tools, Tauri desktop applications, backend services, bots, and AI agents. It provides OpenAPI access, authentication and token caching, one-click app registration, event callbacks, WebSocket/Webhook Channel integration, media handling, and streaming message capabilities while preserving the domain semantics of the official Java SDK through idiomatic Rust APIs.
+
 `oapi-sdk-rust` is an async Rust SDK for the Feishu/Lark Open Platform. It aligns its observable authentication, transport, event, and workflow behavior with the official Go, Python, and Java SDKs while exposing Rust-native builders, enums, traits, and async APIs.
 
 The SDK removes repetitive work around access-token acquisition and caching, request construction, platform error decoding, file upload/download, callback signature verification, encrypted event decoding, and one-click app registration.

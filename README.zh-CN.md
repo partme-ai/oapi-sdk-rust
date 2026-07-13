@@ -6,6 +6,10 @@
 [![MSRV](https://img.shields.io/badge/MSRV-1.85-blue)](rust-toolchain.toml)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+## 项目简介
+
+`oapi-sdk-rust` 是面向飞书 / Lark 开放平台的生产级异步 Rust SDK，适用于 CLI 工具、Tauri 桌面应用、服务端、机器人和 AI Agent。项目提供 OpenAPI 调用、鉴权与令牌缓存、应用一键创建、事件回调、WebSocket/Webhook Channel、媒体处理和流式消息等能力，并在保持 Rust `snake_case`、`async/await`、`Result` 与 trait 使用习惯的同时，对齐官方 Java SDK 的领域对象、调用流程、状态和错误语义。
+
 `oapi-sdk-rust` 是面向飞书 / Lark 开放平台的异步 Rust SDK。项目参考官方 Go、Python、Java SDK 的鉴权、请求、事件和场景能力，使用 Rust 风格的 builder、enum、trait 与 async API 实现。
 
 SDK 旨在减少调用服务端 API 时的重复工作，包括：获取和缓存访问令牌、构造请求、解析平台错误、上传下载文件、事件签名验证、加密回调解密，以及应用一键创建。
