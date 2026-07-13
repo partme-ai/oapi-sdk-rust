@@ -1,0 +1,48 @@
+name: Import verified RC source
+
+on:
+  push:
+    branches:
+      - agent/import-1.0.0-rc.1-main
+    paths:
+      - .import/URL_READY
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download and verify source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://filebin.net/partme-oapi-sdk-rust-a9b7a8e2/oapi-sdk-rust-1.0.0-rc.1.zip'
+          expected='a9b7a8e27e6679cabc5997c0226c5b9b5818451fdb0f53e79d40a423f34125f7'
+          curl --fail --location --retry 4 --retry-delay 3 "$url" -o /tmp/oapi-sdk-rust.zip
+          actual="$(sha256sum /tmp/oapi-sdk-rust.zip | awk '{print $1}')"
+          test "$actual" = "$expected"
+          rm -rf /tmp/oapi-sdk-rust-source
+          mkdir -p /tmp/oapi-sdk-rust-source
+          unzip -q /tmp/oapi-sdk-rust.zip -d /tmp/oapi-sdk-rust-source
+          test -f /tmp/oapi-sdk-rust-source/Cargo.toml
+          grep -q '^version = "1.0.0-rc.1"' /tmp/oapi-sdk-rust-source/Cargo.toml
+
+      - name: Replace branch with verified source
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/oapi-sdk-rust-source/. .
+          git fetch origin main
+          git reset --soft origin/main
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Release 1.0.0-rc.1'
+          git push --force-with-lease origin HEAD:agent/import-1.0.0-rc.1-main
